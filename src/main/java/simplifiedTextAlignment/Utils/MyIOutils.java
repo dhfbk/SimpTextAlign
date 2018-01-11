@@ -1,11 +1,6 @@
 package simplifiedTextAlignment.Utils;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +71,7 @@ public class MyIOutils {
 		out.close();
 	}
 
-	public static Set<String> readNewselaEmbeddingVocabulary(String inFolder, String language) throws IOException {
+	public static Set<String> readNewselaEmbeddingVocabulary(String inFolder, String language, int numberOfSimplifications) throws IOException {
 		Set<String> vocab = new HashSet<String>();
 		
 		DirectoryScanner scanner = new DirectoryScanner();
@@ -85,11 +80,14 @@ public class MyIOutils {
 		scanner.setCaseSensitive(false);
 		scanner.scan();
 		String[] files = scanner.getIncludedFiles();
-	
+		if (!inFolder.endsWith(File.separator)) {
+			inFolder+=File.separator;
+		}
+
 		for(String file : files){
 			String text = MyIOutils.readTextFile(inFolder+file);
 			vocab.addAll(TextProcessingUtils.getCleanEmbeddingModelTokens(text));
-			for (int i = 1; i <= 5; i++) {
+			for (int i = 1; i <= numberOfSimplifications; i++) {
 				file = file.replace("." + language + ".0.txt","." + language + "." + i + ".txt");
 				text = MyIOutils.readTextFile(inFolder+file);
 				if (text != null) 		
@@ -155,7 +153,7 @@ public class MyIOutils {
 				+ " {-u SubLevelalignmentStrategy} {-e embeddingsTxtFile}\n"
 				+ "\"inFolder\" is the folder with the original newsela texts."	
 				+ "\"outFolder\" is the folder where the alignments will be stored."	
-				+ "\"language\" can be \""+DefinedConstants.SpanishLanguage+"\" or \""+DefinedConstants.EnglishLanguage+"\". Default: \""+DefinedConstants.EnglishLanguage+"\"."	
+				+ "\"language\" can be \""+DefinedConstants.ItalianLanguage+"\", \""+DefinedConstants.SpanishLanguage+"\" or \""+DefinedConstants.EnglishLanguage+"\". Default: \""+DefinedConstants.EnglishLanguage+"\"."
 				+ "\"similarityStrategy\" can be \""+DefinedConstants.CNGstrategy+"\", \""+DefinedConstants.WAVGstrategy+"\", or \""+DefinedConstants.CWASAstrategy+"\", where the N in \""+DefinedConstants.CNGstrategy+"\" should be replaced for the desired n-gram size, e.g. \""+DefinedConstants.CNGstrategy.replace("N", 3+"")+"\". Default: \""+DefinedConstants.CNGstrategy.replace("N", 3+"")+"\"."	
 				+ "\"alignmentLevel\" can be \""+DefinedConstants.ParagraphSepEmptyLineLevel+"\", \""+DefinedConstants.SentenceLevel+"\", or \""+DefinedConstants.ParagraphSepEmptyLineAndSentenceLevel+"\". Default: \""+DefinedConstants.SentenceLevel+"\"."
 				+ "\"alignmentStrategy\" can be \""+DefinedConstants.closestSimStrategy+"\" or \""+DefinedConstants.closestSimKeepingSeqStrategy+"\". Default: \""+DefinedConstants.closestSimStrategy+"\"."

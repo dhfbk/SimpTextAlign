@@ -3,6 +3,7 @@ package simplifiedTextAlignment.Utils;
 public class DefinedConstants {
 	public static final String EnglishLanguage = "en";
 	public static final String SpanishLanguage = "es";
+	public static final String ItalianLanguage = "it";
 
 	public static final String ParagraphSepEmptyLineLevel = "paragraphSeparatedByEmptyLine";
 	public static final String SentenceLevel = "sentence";

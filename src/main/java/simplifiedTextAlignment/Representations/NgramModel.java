@@ -1,6 +1,7 @@
 package simplifiedTextAlignment.Representations;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class NgramModel {
 		nDocs = 0;
 	}
 	
-	public void buildNewselaNgramModel(String inFolder, String language, String alignmentLevel) throws IOException {
+	public void buildNewselaNgramModel(String inFolder, String language, String alignmentLevel, int numberOfSimplifications) throws IOException {
 		DirectoryScanner scanner = new DirectoryScanner();
 		scanner.setIncludes(new String[]{"*."+language+".0.txt"});
 		scanner.setBasedir(inFolder);
@@ -44,9 +45,9 @@ public class NgramModel {
 	
 		//CARE, THIS LOOP IS DEPENDENT OF THE NEWSELA DATASET FORMAT
 		for(String file : files){
-			String text = MyIOutils.readTextFile(inFolder+file);
+			String text = MyIOutils.readTextFile(inFolder+ File.separator+file);
 			processAndCountTextNgrams(text,alignmentLevel);
-			for (int i = 1; i <= 5; i++) {
+			for (int i = 1; i <= numberOfSimplifications; i++) {
 				file = file.replace("." + language + ".0.txt","." + language + "." + i + ".txt");
 				text = MyIOutils.readTextFile(inFolder+file);
 				if (text != null)

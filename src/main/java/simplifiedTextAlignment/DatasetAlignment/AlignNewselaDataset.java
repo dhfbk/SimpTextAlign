@@ -38,6 +38,7 @@ public class AlignNewselaDataset {
 //		String alignmentLevel = DefinedConstants.ParagraphSepEmptyLineAndSentenceLevel;
 		
 		int nGramSize = 3;
+		int numberOfSimplifications = 5;
 		
 //		String similarityStrategy = DefinedConstants.WAVGstrategy;
 //		String similarityStrategy = DefinedConstants.CWASAstrategy;
@@ -76,9 +77,15 @@ public class AlignNewselaDataset {
 			alignmentStrategy = param2value.get("aSt");
 			subLvAlignmentStrategy = param2value.get("aSt2");
 			embeddingsFile = param2value.get("emb");
+			try {
+			    numberOfSimplifications = Integer.parseInt(param2value.get("simpNumber"));
+			}
+			catch (Exception e) {
+			    // ignored
+			}
 			if (similarityStrategy != null && similarityStrategy.length() == 3 && similarityStrategy.charAt(0) == 'C'	&& similarityStrategy.charAt(2) == 'G') {
-				similarityStrategy = DefinedConstants.CNGstrategy;
 				nGramSize = Integer.parseInt(similarityStrategy.charAt(1) + "");
+				similarityStrategy = DefinedConstants.CNGstrategy;
 			}
 		} else {
 			System.out.println("Using parameters by default. ");
@@ -91,7 +98,7 @@ public class AlignNewselaDataset {
 		ModelContainer model = null;
 		if((isCWASA=similarityStrategy.equals(DefinedConstants.CWASAstrategy)) || similarityStrategy.equals(DefinedConstants.WAVGstrategy)){
 			System.out.println("Reading embeddings...");
-			Set<String> vocab = MyIOutils.readNewselaEmbeddingVocabulary(inFolder,language);
+			Set<String> vocab = MyIOutils.readNewselaEmbeddingVocabulary(inFolder,language, numberOfSimplifications);
 			model = new ModelContainer(new EmbeddingModel(embeddingsFile,vocab));
 			if(isCWASA){
 				model.em.precomputeW2VcosDist();
@@ -102,7 +109,7 @@ public class AlignNewselaDataset {
 			System.out.println("Calculating IDF...");
 			NgramModel aux;
 			model = new ModelContainer(aux = new NgramModel(true, nGramSize));
-			aux.buildNewselaNgramModel(inFolder,language, alignmentLevel);
+			aux.buildNewselaNgramModel(inFolder,language, alignmentLevel, numberOfSimplifications);
 		}
 		
 		// create output folder if it does not exists
@@ -118,27 +125,34 @@ public class AlignNewselaDataset {
 		
 		System.out.println("Aligning...");
 		long ini = System.currentTimeMillis();
-		alignNewselaDataset(inFolder,language,outFolder,alignmentLevel, similarityStrategy, alignmentStrategy, subLvAlignmentStrategy, model);
+		alignNewselaDataset(inFolder,language,outFolder,alignmentLevel, similarityStrategy, alignmentStrategy, subLvAlignmentStrategy, model, numberOfSimplifications);
 		long end = System.currentTimeMillis();
 		System.out.println("Alignment done in " + ((double) ((end-ini)/ 1000) / 60) + " minutes.");
 	}
 
 	private static void alignNewselaDataset(String inFolder, String language, String outFolder,
-			String alignmentLevel, String similarityStrategy, String alignmentStrategy, String subLvAlignmentStrategy, ModelContainer model) throws IOException {	
+			String alignmentLevel, String similarityStrategy, String alignmentStrategy, String subLvAlignmentStrategy, ModelContainer model,
+			Integer numberOfSimplifications) throws IOException {
 		DirectoryScanner scanner = new DirectoryScanner();
 		scanner.setIncludes(new String[]{"*."+language+".0.txt"});
 		scanner.setBasedir(inFolder);
 		scanner.setCaseSensitive(false);
 		scanner.scan();
 		String[] files = scanner.getIncludedFiles();
-	
+		if (!outFolder.endsWith(File.separator)) {
+			outFolder+=File.separator;
+		}
+		if (!inFolder.endsWith(File.separator)) {
+			inFolder+=File.separator;
+		}
+
 		int j = 0;
 		for(String file1 : files){
 			String text1 = MyIOutils.readTextFile(inFolder+file1);
 			List<Text2abstractRepresentation> cleanSubtexts1 = TextProcessingUtils.getCleanText(text1,alignmentLevel, similarityStrategy, model);
 			String fileAux = null;
 			List<Text2abstractRepresentation> cleanSubtextsAux = null;
-			for (int i = 1; i <= 5; i++) {
+			for (int i = 1; i <= numberOfSimplifications; i++) {
 				String file2 = file1.replace("." + language + ".0.txt","." + language + "." + i + ".txt");
 				String text2 = MyIOutils.readTextFile(inFolder + file2);
 				if (text2 != null) {
@@ -152,7 +166,7 @@ public class AlignNewselaDataset {
 			file1 = fileAux;
 			cleanSubtexts1 = cleanSubtextsAux;
 			if(file1 != null)
-			for (int i = 2; i <= 5; i++) {
+			for (int i = 2; i <= numberOfSimplifications; i++) {
 				String file2 = file1.replace("." + language + "." + (i - 1) + ".txt","." + language + "." + i + ".txt");
 				String text2 = MyIOutils.readTextFile(inFolder + file2);
 				if (text2 != null) {
