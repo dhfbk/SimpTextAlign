@@ -134,6 +134,8 @@ public class MyIOutils {
 				param2value.put("language", ar[i+1]);
 			else if(ar[i].equals("-s"))
 				param2value.put("similarity", ar[i+1]);
+			else if(ar[i].equals("-n"))
+				param2value.put("simpNumber", ar[i+1]);
 			else if(ar[i].equals("-a"))
 				param2value.put("aLv", ar[i+1]);
 			else if(ar[i].equals("-t"))

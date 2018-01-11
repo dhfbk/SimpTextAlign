@@ -33,5 +33,22 @@
 			<artifactId>mtj</artifactId>
 			<version>1.0.4</version>
 		</dependency>
+
+        <!-- FBK -->
+        <dependency>
+            <groupId>eu.fbk.utils</groupId>
+            <artifactId>utils-core</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.22</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.fbk.dh</groupId>
+            <artifactId>tint-runner</artifactId>
+            <version>0.2</version>
+        </dependency>
 	</dependencies>
 </project>
