@@ -14,11 +14,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class ConvertAlignmentsForNN {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConvertAlignmentsForNN.class);
-    private static final Pattern pattern = Pattern.compile("^([0-9]+):\\s+(.*)\\s+---\\(([0-9.]+)\\)--->\\s+([0-9]+):\\s+(.*)$");
+    private static final Pattern pattern = Pattern.compile("^(#[A-Z]+\\s+)?([0-9]+):\\s+(.*)\\s+---\\(([0-9.]+)\\)--->\\s+([0-9]+):\\s+(.*)$");
 
     public static void main(String[] args) {
         try {
@@ -56,17 +55,23 @@ public class ConvertAlignmentsForNN {
                     }
                     Matcher matcher = pattern.matcher(line);
                     if (!matcher.find()) {
-                        LOGGER.error("Line does not match! " + line);
+                        LOGGER.error("Line does not match in file {}! {}", file.getName(), line);
                         continue;
                     }
 
-                    String txt1 = matcher.group(2);
-                    String txt2 = matcher.group(5);
-                    if (s) {
-                        txt1 = matcher.group(5);
-                        txt2 = matcher.group(2);
+                    String flagText = matcher.group(1);
+                    if (flagText != null && flagText.toLowerCase().trim().equals("#deleted")) {
+                        LOGGER.info("Line deleted");
+                        continue;
                     }
-                    Double similarity = Double.parseDouble(matcher.group(3));
+
+                    String txt1 = matcher.group(3);
+                    String txt2 = matcher.group(6);
+                    if (s) {
+                        txt1 = matcher.group(6);
+                        txt2 = matcher.group(3);
+                    }
+                    Double similarity = Double.parseDouble(matcher.group(4));
 
                     txt1 = txt1.replace('\t', ' ');
                     txt2 = txt2.replace('\t', ' ');

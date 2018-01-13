@@ -50,5 +50,5 @@
             <artifactId>tint-runner</artifactId>
             <version>0.2</version>
         </dependency>
-	</dependencies>
+    </dependencies>
 </project>
